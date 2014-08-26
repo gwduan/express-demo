@@ -25,7 +25,7 @@ app.use(morgan('combined', {stream: accessLogFile}));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-app.use(cookieParser());
+app.use(cookieParser('express-demo'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
