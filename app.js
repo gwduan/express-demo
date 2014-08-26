@@ -28,6 +28,22 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser('express-demo'));
 app.use(express.static(path.join(__dirname, 'public')));
 
+var session = require('express-session');
+var sessionStore = require('connect-redis')(session);
+var storeOptions = {
+  host: '127.0.0.1',
+  port: 6379,
+  prefix: 'express_sess:'
+};
+app.use(session({
+  name: 'express.sid',
+  secret: 'sessionExpressDemo',
+  cookie: {maxAge: 1000 * 60 * 60 * 24},
+  resave: true,
+  saveUninitialized: true,
+  store: new sessionStore(storeOptions)
+}));
+
 app.use('/', routes);
 app.use('/users', users);
 
