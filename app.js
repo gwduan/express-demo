@@ -4,6 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var morgan = require('morgan');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -15,7 +16,13 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 app.use(favicon(__dirname + '/public/favicon.ico'));
-app.use(logger('dev'));
+
+// Access Logger
+var fs = require('fs');
+var accessLogFile = fs.createWriteStream(__dirname + '/logs/access.log',
+                                                          {flags: 'a'});
+app.use(morgan('combined', {stream: accessLogFile}));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
