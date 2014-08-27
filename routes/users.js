@@ -11,9 +11,11 @@ var format = require('date-format');
 router.get('/', function(req, res) {
   res.send('respond with a resource');
 });
-
 router.post('/register', function(req, res) {
     registerProc(db, req, res);
+});
+router.post('/login', function(req, res) {
+    loginProc(db, req, res);
 });
 
 function registerProc(db, req, res) {
@@ -83,6 +85,52 @@ function incUserTotal(reg_date) {
     if (err) {
       errlog('MULTI HINCRBY for new user registeration ' + err);
     }
+  });
+};
+
+function loginProc(db, req, res) {
+  var user_id = req.body.phone;
+  var user_pass = req.body.password;
+
+  debug('user_id:' + user_id);
+  debug('user_pass:' + user_pass);
+
+  if (!valid.isNumeric(user_id) || !valid.isLength(user_id, 11, 11)) {
+    res.send({code: -1, info: '输入数据错误!'});
+    return;
+  }
+  if (!valid.isLength(user_pass, 6)) {
+    res.send({code: -1, info: '输入数据错误!'});
+    return;
+  }
+
+  db.collection('users', function(err, collection) {
+    if (err) {
+      errlog('Open collection ' + err);
+      res.send({code: -1, info: '数据库操作失败!'});
+      return;
+    }
+
+    collection.findOne({_id: user_id}, function(err, user_doc) {
+      if (err) {
+        errlog('Find documents ' + err);
+        res.send({code: -1, info: '数据库操作失败!'});
+        return;
+      }
+      if (!user_doc) {
+        res.send({code: -1, info: '用户信息不存在!'});
+        return;
+      }
+      if (user_pass !== user_doc.password) {
+        res.send({code: -1, info: '用户密码不正确!'});
+        return;
+      }
+      user_doc.password = '';
+
+      req.session.user = user_id;
+
+      res.send({code: 0, user: user_doc});
+    });
   });
 };
 
