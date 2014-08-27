@@ -13,6 +13,7 @@
     "body-parser": "1.6.5",
     "express-session": "1.7.6",
     "connect-redis": "2.0.0",
+    "mongodb": "1.4.9",
     "debug": "1.0.4",
     "jade": "1.5.0"
   }

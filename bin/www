@@ -5,6 +5,14 @@ var app = require('../app');
 var settings = require('../settings');
 app.set('port', settings.sys.listenPort);
 
-var server = app.listen(app.get('port'), function() {
-  debug('Express server listening on port ' + server.address().port);
+var conn = require('../models/mymongo');
+conn.open(function(err, db) {
+  if (err) {
+    console.log('Open MongoDB ' + err);
+    process.exit(1);
+  }
+
+  var server = app.listen(app.get('port'), function() {
+    debug('Express server listening on port ' + server.address().port);
+  });
 });
