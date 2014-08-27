@@ -5,6 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
+var multer = require('multer');
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -25,6 +26,7 @@ app.use(morgan('combined', {stream: accessLogFile}));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
+app.use(multer({dest: __dirname + '/public/'}));
 app.use(cookieParser('express-demo'));
 app.use(express.static(path.join(__dirname, 'public')));
 
