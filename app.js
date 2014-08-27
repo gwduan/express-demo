@@ -30,11 +30,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 var session = require('express-session');
 var sessionStore = require('connect-redis')(session);
+var settings = require('./settings');
 var storeOptions = {
-  host: '127.0.0.1',
-  port: 6379,
+  host: settings.sess.host,
+  port: settings.sess.port,
   prefix: 'express_sess:'
 };
+if (settings.sess.pass) {
+  storeOptions.pass = settings.sess.pass;
+}
 app.use(session({
   name: 'express.sid',
   secret: 'sessionExpressDemo',
