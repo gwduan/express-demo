@@ -17,6 +17,9 @@ router.post('/register', function(req, res) {
 router.post('/login', function(req, res) {
     loginProc(db, req, res);
 });
+router.post('/logout', function(req, res) {
+    logoutProc(db, req, res);
+});
 
 function registerProc(db, req, res) {
   var user_id = req.body.phone;
@@ -132,6 +135,25 @@ function loginProc(db, req, res) {
       res.send({code: 0, user: user_doc});
     });
   });
+};
+
+function logoutProc(db, req, res) {
+  var user_id = req.body.phone;
+
+  debug('user_id:' + user_id);
+
+  if (!valid.isNumeric(user_id) || !valid.isLength(user_id, 11, 11)) {
+    res.send({code: -1, info: '输入数据错误!'});
+    return;
+  }
+
+  if (req.session.user !== user_id) {
+    res.send({code: -1, info: '是你吗？'});
+    return;
+  }
+
+  req.session.user = null;
+  res.send({code: 0, info: 'Success'});
 };
 
 module.exports = router;
