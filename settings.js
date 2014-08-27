@@ -6,6 +6,10 @@ module.exports = {
     host: '127.0.0.1',
     port: 6379,
   },
+  cache: {
+    host: '127.0.0.1',
+    port: 6379,
+  },
   mongodb: {
     name: 'express-demo',
     host: '127.0.0.1',
