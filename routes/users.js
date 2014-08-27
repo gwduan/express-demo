@@ -6,6 +6,7 @@ var errlog = require('../errlog');
 var debug = require('debug')('express-demo');
 var valid = require('validator');
 var format = require('date-format');
+var util = require('util');
 
 /* GET users listing. */
 router.get('/', function(req, res) {
@@ -22,6 +23,9 @@ router.post('/logout', function(req, res) {
 });
 router.post('/passwd', function(req, res) {
   passwdProc(db, req, res);
+});
+router.post('/uploads', function(req, res) {
+  uploadsProc(db, req, res);
 });
 
 function registerProc(db, req, res) {
@@ -209,6 +213,38 @@ function passwdProc(db, req, res) {
       res.send({code: 0, info: 'Success'});
     });
   });
+};
+
+function uploadsProc(db, req, res) {
+  var user_id = req.body.phone;
+
+  debug('user_id:' + user_id);
+
+  if (!valid.isNumeric(user_id) || !valid.isLength(user_id, 11, 11)) {
+    res.send({code: -1, info: '输入数据错误!'});
+    return;
+  }
+
+  if (req.session.user !== user_id) {
+    res.send({code: -1, info: '请先登录！'});
+    return;
+  }
+
+  var photos = req.files.photos
+  var org_names = [];
+  var new_names = [];
+  if (util.isArray(photos)) {
+    for (i = 0; i < photos.length; i++) {
+      org_names.push(photos[i].originalname);
+      new_names.push(photos[i].name);
+    }
+  } else {
+    org_names.push(photos.originalname);
+    new_names.push(photos.name);
+  }
+
+  res.send({code: 0, file_num: org_names.length,
+            old_names: org_names, new_names: new_names});
 };
 
 module.exports = router;
