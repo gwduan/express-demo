@@ -12,13 +12,16 @@ router.get('/', function(req, res) {
   res.send('respond with a resource');
 });
 router.post('/register', function(req, res) {
-    registerProc(db, req, res);
+  registerProc(db, req, res);
 });
 router.post('/login', function(req, res) {
-    loginProc(db, req, res);
+  loginProc(db, req, res);
 });
 router.post('/logout', function(req, res) {
-    logoutProc(db, req, res);
+  logoutProc(db, req, res);
+});
+router.post('/passwd', function(req, res) {
+  passwdProc(db, req, res);
 });
 
 function registerProc(db, req, res) {
@@ -148,12 +151,64 @@ function logoutProc(db, req, res) {
   }
 
   if (req.session.user !== user_id) {
-    res.send({code: -1, info: '是你吗？'});
+    res.send({code: -1, info: '请先登录！'});
     return;
   }
 
   req.session.user = null;
   res.send({code: 0, info: 'Success'});
+};
+
+function passwdProc(db, req, res) {
+  var user_id = req.body.phone;
+  var user_old_pass = req.body.old_password;
+  var user_new_pass = req.body.new_password;
+
+  debug('user_id:' + user_id);
+  debug('user_old_pass:' + user_old_pass);
+  debug('user_new_pass:' + user_new_pass);
+
+  if (!valid.isNumeric(user_id) || !valid.isLength(user_id, 11, 11)) {
+    res.send({code: -1, info: '输入数据错误!'});
+    return;
+  }
+  if (!valid.isLength(user_old_pass, 6)) {
+    res.send({code: -1, info: '输入数据错误!'});
+    return;
+  }
+  if (!valid.isLength(user_new_pass, 6)) {
+    res.send({code: -1, info: '输入数据错误!'});
+    return;
+  }
+
+  if (req.session.user !== user_id) {
+    res.send({code: -1, info: '请先登录！'});
+    return;
+  }
+
+  db.collection('users', function(err, collection) {
+    if (err) {
+      errlog('Open collection ' + err);
+      res.send({code: -1, info: '数据库操作失败!'});
+      return;
+    }
+
+    collection.update({_id: user_id, password: user_old_pass},
+                      {$set: {password: user_new_pass}},
+                      {w: 1}, function(err, count) {
+      if (err) {
+        errlog('Update documents ' + err);
+        res.send({code: -1, info: '数据库操作失败!'});
+        return;
+      }
+      if (!count) {
+        res.send({code: -1, info: '用户旧密码不正确!'});
+        return;
+      }
+
+      res.send({code: 0, info: 'Success'});
+    });
+  });
 };
 
 module.exports = router;
